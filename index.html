@@ -121,6 +121,7 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 const SHOP_MAP = { '01': '楽天', '02': 'Amazon', '03': 'Yahoo' };
 const SHOP_COLORS = { '01': 'shop-01', '02': 'shop-02', '03': 'shop-03' };
+function normShop(code) { if (!code) return code; return code.length === 1 ? '0' + code : code; }
 const LEVEL_OPTIONS = ['Lv.1','Lv.2','Lv.2固定','Lv.3','Lv.4','セラー追従','OFF'];
 const LEVEL_COLORS = {
   'Lv.1': 'badge-blue', 'Lv.2': 'badge-green', 'Lv.2固定': 'badge-green',
@@ -623,7 +624,8 @@ async function pageOrders(el) {
       .neq('cancel_flag', '1');
 
     if (shops.length > 0 && shops.length < 3) {
-      query = query.in('shop_code', shops);
+      const shopVariants = shops.flatMap(s => [s, s.replace(/^0/, '')]);
+      query = query.in('shop_code', [...new Set(shopVariants)]);
     }
     if (dateFrom) query = query.gte('order_date', dateFrom + 'T00:00:00');
     if (dateTo) query = query.lte('order_date', dateTo + 'T23:59:59');
@@ -703,7 +705,7 @@ async function pageOrders(el) {
           <tbody id="orders-body">
             ${rows.map(r => `<tr>
               <td class="text-xs">${fmtDate(r.order_date)}</td>
-              <td><span class="badge ${SHOP_COLORS[r.shop_code]||'badge-gray'} text-xs">${escHtml(SHOP_MAP[r.shop_code]||r.shop_code)}</span></td>
+              <td><span class="badge ${SHOP_COLORS[normShop(r.shop_code)]||'badge-gray'} text-xs">${escHtml(SHOP_MAP[normShop(r.shop_code)]||r.shop_code)}</span></td>
               <td class="text-xs font-mono">${/^\d+$/.test(r.order_number||'') ? escHtml(r.order_number) : '—'}</td>
               <td class="text-xs font-mono">${escHtml(r.order_code || r.order_number)}</td>
               <td class="text-xs font-mono">${escHtml(r.item_code)}</td>
