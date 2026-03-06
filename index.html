@@ -953,15 +953,18 @@ async function pageSkus(el) {
 // PAGE: SETTINGS
 // ============================================================
 async function pageSettings(el) {
-  const [settRes, sellerRes, ignoredRes] = await Promise.all([
+  const [settRes, sellerRes, ignoredRes, usersRes] = await Promise.all([
     sb.from('settings').select('*').order('key'),
     sb.from('seller_master').select('*').order('seller_id'),
     sb.from('ignored_sellers').select('*').order('seller_id'),
+    sb.from('allowed_users').select('*').order('email'),
   ]);
 
   const settings = settRes.data || [];
   const sellers = sellerRes.data || [];
   const ignored = ignoredRes.data || [];
+  let allowedUsers = usersRes.data || [];
+  const isAdmin = userRole === 'admin';
   let activeTab = 'settings';
 
   function render() {
@@ -971,6 +974,7 @@ async function pageSettings(el) {
         <button class="btn ${activeTab==='settings'?'btn-primary':'btn-secondary'} text-xs" onclick="document.dispatchEvent(new CustomEvent('settings-tab',{detail:'settings'}))">システム設定</button>
         <button class="btn ${activeTab==='sellers'?'btn-primary':'btn-secondary'} text-xs" onclick="document.dispatchEvent(new CustomEvent('settings-tab',{detail:'sellers'}))">セラーマスター</button>
         <button class="btn ${activeTab==='ignored'?'btn-primary':'btn-secondary'} text-xs" onclick="document.dispatchEvent(new CustomEvent('settings-tab',{detail:'ignored'}))">無視セラー</button>
+        ${isAdmin ? `<button class="btn ${activeTab==='users'?'btn-primary':'btn-secondary'} text-xs" onclick="document.dispatchEvent(new CustomEvent('settings-tab',{detail:'users'}))">アクセス管理</button>` : ''}
       </div>
       <div id="settings-content"></div>
     `;
@@ -1073,6 +1077,69 @@ async function pageSettings(el) {
           </table>
         </div>
       `;
+    }
+
+    if (activeTab === 'users' && isAdmin) {
+      container.innerHTML = `
+        <div class="card mb-4">
+          <h3 class="font-semibold text-sm mb-3">ユーザー追加</h3>
+          <div class="flex gap-2">
+            <input type="email" class="input flex-1 text-xs" placeholder="メールアドレス" id="new-user-email">
+            <select class="input text-xs" id="new-user-role">
+              <option value="viewer">viewer</option>
+              <option value="admin">admin</option>
+            </select>
+            <button class="btn btn-primary text-xs" id="add-user-btn">追加</button>
+          </div>
+        </div>
+        <div class="card">
+          <table class="data-table">
+            <thead><tr><th>メールアドレス</th><th>ロール</th><th>追加日</th><th></th></tr></thead>
+            <tbody>
+              ${allowedUsers.map(u => `<tr>
+                <td class="text-xs">${escHtml(u.email)}</td>
+                <td>
+                  <select class="input text-xs py-0.5 user-role-select" data-email="${escHtml(u.email)}">
+                    <option value="viewer" ${u.role==='viewer'?'selected':''}>viewer</option>
+                    <option value="admin" ${u.role==='admin'?'selected':''}>admin</option>
+                  </select>
+                </td>
+                <td class="text-xs text-gray-500">${fmtDateShort(u.created_at)}</td>
+                <td><button class="btn btn-secondary text-xs py-0.5 px-2 text-red-600 delete-user-btn" data-email="${escHtml(u.email)}">削除</button></td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+
+      document.getElementById('add-user-btn').addEventListener('click', async () => {
+        const email = document.getElementById('new-user-email').value.trim();
+        const role = document.getElementById('new-user-role').value;
+        if (!email) return;
+        const { error } = await sb.from('allowed_users').insert({ email, role });
+        if (error) toast('追加失敗: ' + error.message, 'error');
+        else { toast(email + ' を追加しました'); allowedUsers.push({ email, role, created_at: new Date().toISOString() }); render(); }
+      });
+
+      container.querySelectorAll('.user-role-select').forEach(sel => {
+        sel.addEventListener('change', async e => {
+          const email = e.target.dataset.email;
+          const { error } = await sb.from('allowed_users').update({ role: e.target.value }).eq('email', email);
+          if (error) toast('更新失敗: ' + error.message, 'error');
+          else { toast('ロールを更新しました'); const u = allowedUsers.find(x => x.email === email); if (u) u.role = e.target.value; }
+        });
+      });
+
+      container.querySelectorAll('.delete-user-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const email = btn.dataset.email;
+          if (email === currentUser.email) { toast('自分自身は削除できません', 'error'); return; }
+          if (!confirm(email + ' を削除しますか？')) return;
+          const { error } = await sb.from('allowed_users').delete().eq('email', email);
+          if (error) toast('削除失敗: ' + error.message, 'error');
+          else { toast(email + ' を削除しました'); allowedUsers = allowedUsers.filter(u => u.email !== email); render(); }
+        });
+      });
     }
   }
 
