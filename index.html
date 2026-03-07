@@ -53,6 +53,57 @@
   .chevron.open { transform: rotate(90deg); }
   .maker-badge { padding: 0.0625rem 0.375rem; border-radius: 0.25rem; font-size: 0.6875rem; font-weight: 500; }
   .sku-row-bx { background: rgba(251,191,36,0.06); border-left: 2px solid #f59e0b; }
+
+  /* Pricing table (block-based) */
+  .pricing-table { width: 100%; border-collapse: collapse; font-size: 0.8125rem; table-layout: auto; }
+  .pricing-table th, .pricing-table td { padding: 4px 8px; border: 1px solid #e5e7eb; white-space: nowrap; }
+  .pricing-table th { background: #f9fafb; font-weight: 600; position: sticky; top: 0; z-index: 2; font-size: 0.75rem; }
+  .pricing-table td { vertical-align: middle; }
+  .pricing-table tr:hover td { background: #fafbfc; }
+  .pricing-wrap { overflow-x: auto; overflow-y: auto; max-height: calc(100vh - 160px); border: 1px solid #e5e7eb; border-radius: 0.375rem; }
+  .pricing-table th.sticky-col, .pricing-table td.sticky-col { position: sticky; left: 0; z-index: 1; background: inherit; }
+  .pricing-table th.sticky-col { z-index: 3; }
+  .block-hdr { cursor: pointer; user-select: none; font-weight: 700; font-size: 0.6875rem; text-transform: uppercase; letter-spacing: 0.5px; }
+  .block-hdr:hover { opacity: 0.8; }
+  .block-hdr .arr { display: inline-block; transition: transform 0.15s; font-size: 0.625rem; margin-right: 3px; }
+  .block-hdr .arr.open { transform: rotate(90deg); }
+  .jan-tr { cursor: pointer; background: #f1f5f9; font-weight: 600; }
+  .jan-tr:hover td { background: #e2e8f0 !important; }
+  .jan-tr .arr { display: inline-block; transition: transform 0.15s; font-size: 0.625rem; margin-right: 4px; color: #9ca3af; }
+  .jan-tr .arr.open { transform: rotate(90deg); }
+  .sku-tr { background: #fff; }
+  .sku-tr.bx-row { background: rgba(251,191,36,0.06); border-left: 2px solid #f59e0b; }
+  .sku-tr.hidden-row { display: none; }
+  .detail-tr.hidden-row { display: none; }
+  .detail-tr td { padding: 8px; background: #fafbfc; }
+  .detail-flex { display: flex; gap: 16px; flex-wrap: wrap; }
+  .comp-tbl { font-size: 0.6875rem; border-collapse: collapse; }
+  .comp-tbl th, .comp-tbl td { padding: 3px 8px; border: 1px solid #e5e7eb; }
+  .comp-tbl th { background: #f9fafb; }
+  .comp-tbl tr.own { background: #eff6ff; }
+  .comp-tbl tr.low { background: #f0fdf4; }
+  .keepa-img img { max-width: 600px; height: auto; border-radius: 4px; border: 1px solid #e5e7eb; }
+  .inline-inp { width: 70px; padding: 2px 4px; border: 1px solid #d1d5db; border-radius: 3px; font-size: 0.75rem; text-align: right; }
+  .inline-inp:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 1px rgba(59,130,246,0.3); }
+  .inline-sel { padding: 2px 4px; border: 1px solid #d1d5db; border-radius: 3px; font-size: 0.6875rem; }
+  .inline-sel:focus { outline: none; border-color: #3b82f6; }
+  .text-green { color: #16a34a; }
+  .text-red { color: #dc2626; }
+
+  /* Notification settings */
+  .notify-section { border: 1px solid #e5e7eb; border-radius: 0.375rem; padding: 1rem; margin-bottom: 1rem; }
+  .notify-section h4 { font-size: 0.875rem; font-weight: 600; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; }
+  .notify-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+  .field-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 4px; margin: 8px 0; }
+  .field-check { display: flex; align-items: center; gap: 6px; font-size: 0.75rem; padding: 3px 6px; border-radius: 4px; }
+  .field-check:hover { background: #f3f4f6; }
+  .field-group-lbl { font-size: 0.6875rem; font-weight: 600; margin-top: 8px; margin-bottom: 2px; }
+  .toggle-sw { position: relative; width: 36px; height: 20px; display: inline-block; }
+  .toggle-sw input { opacity: 0; width: 0; height: 0; }
+  .toggle-sl { position: absolute; inset: 0; background: #d1d5db; border-radius: 10px; cursor: pointer; transition: 0.2s; }
+  .toggle-sl::before { content: ''; position: absolute; width: 16px; height: 16px; left: 2px; bottom: 2px; background: #fff; border-radius: 50%; transition: 0.2s; }
+  .toggle-sw input:checked + .toggle-sl { background: #16a34a; }
+  .toggle-sw input:checked + .toggle-sl::before { transform: translateX(16px); }
 </style>
 </head>
 <body class="bg-gray-50 text-gray-900">
@@ -140,6 +191,56 @@ const LEVEL_OPTIONS = ['Lv.1','Lv.2','Lv.2固定','Lv.3','Lv.4','セラー追従
 const LEVEL_COLORS = {
   'Lv.1': 'badge-blue', 'Lv.2': 'badge-green', 'Lv.2固定': 'badge-green',
   'Lv.3': 'badge-amber', 'Lv.4': 'badge-red', 'セラー追従': 'badge-purple', 'OFF': 'badge-gray'
+};
+
+const FIELD_DEFS = {
+  common: {
+    label: '共通', color: '#6b7280',
+    fields: [
+      { key: 'product_name', label: '商品名', visible: true, align: 'left' },
+      { key: 'stock_quantity', label: '在庫', visible: true, align: 'right' },
+      { key: 'unit_price', label: '定価', visible: true, align: 'right' },
+      { key: 'maker', label: 'メーカー', visible: false, align: 'left' },
+      { key: 'cost_price', label: '仕入値', visible: false, align: 'right' },
+      { key: 'wholesale_rate', label: '掛率', visible: false, align: 'right' },
+      { key: 'release_date', label: '発売日', visible: false, align: 'left' },
+      { key: 'inventory_pool', label: 'プール', visible: false, align: 'left' },
+    ]
+  },
+  amazon: {
+    label: 'Amazon', color: '#0ea5e9',
+    fields: [
+      { key: 'amz_price', label: '自社価格', visible: true, align: 'right', editable: 'price' },
+      { key: 'amz_level', label: 'レベル', visible: true, align: 'left', editable: 'level' },
+      { key: 'amz_lowest', label: '最安競合', visible: true, align: 'right' },
+      { key: 'amz_sellers', label: '出品者', visible: true, align: 'right' },
+      { key: 'amz_sales_30d', label: '30日売上', visible: true, align: 'right' },
+      { key: 'asin', label: 'ASIN', visible: false, align: 'left' },
+      { key: 'amz_calc_price', label: '算出価格', visible: false, align: 'right' },
+      { key: 'amz_diff', label: '差額', visible: false, align: 'right' },
+      { key: 'amz_profit', label: '粗利', visible: false, align: 'right' },
+      { key: 'amz_multiplier', label: '倍率', visible: false, align: 'right', editable: 'mult' },
+      { key: 'amz_yield', label: '収量', visible: false, align: 'right', editable: 'yield' },
+      { key: 'amz_keepa_new', label: 'Keepa新品', visible: false, align: 'right' },
+      { key: 'amz_bb_price', label: 'BB価格', visible: false, align: 'right' },
+      { key: 'amz_ranking', label: 'ランキング', visible: false, align: 'right' },
+      { key: 'amz_keepa_graph', label: 'Keepaグラフ', visible: false, align: 'center', type: 'image' },
+    ]
+  },
+  rakuten: {
+    label: '楽天', color: '#dc2626',
+    fields: [
+      { key: 'rk_sales_30d', label: '30日売上', visible: true, align: 'right' },
+      { key: 'rk_revenue_30d', label: '30日売上額', visible: false, align: 'right' },
+    ]
+  },
+  yahoo: {
+    label: 'Yahoo', color: '#9333ea',
+    fields: [
+      { key: 'yh_sales_30d', label: '30日売上', visible: true, align: 'right' },
+      { key: 'yh_revenue_30d', label: '30日売上額', visible: false, align: 'right' },
+    ]
+  }
 };
 
 // ============================================================
@@ -443,7 +544,7 @@ async function pagePricing(el) {
     sb.from('seller_asin_overrides').select('*'),
     sb.from('keepa_product_data').select('*'),
     sb.from('product_rankings').select('*'),
-    sb.from('order_details_flat').select('jan_cd, amount, order_date').gte('order_date', new Date(Date.now() - 30 * 86400000).toISOString()),
+    sb.from('order_details_flat').select('jan_cd, amount, amount_price, order_date, shop_code').gte('order_date', new Date(Date.now() - 30 * 86400000).toISOString()).neq('cancel_flag', '1'),
   ]);
 
   const allSkus = skuRes.data || [];
@@ -460,6 +561,7 @@ async function pagePricing(el) {
   const settingsMap = {};
   settingsArr.forEach(s => settingsMap[s.key] = s.value);
   const ownSellerId = settingsMap.own_seller_id ? String(settingsMap.own_seller_id).replace(/"/g, '') : '';
+  const keepaApiKey = settingsMap.keepa_api_key ? String(settingsMap.keepa_api_key).replace(/"/g, '') : '';
   const offersByAsin = {};
   offers.forEach(o => { (offersByAsin[o.asin] = offersByAsin[o.asin] || []).push(o); });
   const keepaByAsin = {};
@@ -472,8 +574,17 @@ async function pagePricing(el) {
   asinOvArr.forEach(o => asinOvMap[o.seller_id + ':' + o.asin] = o);
   const rankByAsin = {};
   rankings.forEach(r => { (rankByAsin[r.asin] = rankByAsin[r.asin] || []).push(r); });
-  const salesByJan = {};
-  salesData.forEach(r => { (salesByJan[r.jan_cd] = salesByJan[r.jan_cd] || []).push(r); });
+
+  // Mall-based sales from order_details_flat
+  const salesByJanMall = {};
+  salesData.forEach(r => {
+    const jan = r.jan_cd; if (!jan) return;
+    const sc = String(r.shop_code || '').padStart(2, '0');
+    if (!salesByJanMall[jan]) salesByJanMall[jan] = {};
+    if (!salesByJanMall[jan][sc]) salesByJanMall[jan][sc] = { qty: 0, revenue: 0 };
+    salesByJanMall[jan][sc].qty += Number(r.amount) || 0;
+    salesByJanMall[jan][sc].revenue += Number(r.amount_price) || 0;
+  });
 
   // Override state (local edits)
   const levelOv = {}, yieldOv = {}, priceOv = {}, multOv = {};
@@ -481,8 +592,8 @@ async function pagePricing(el) {
   // Filter state
   let search = '', filterMaker = '', filterLevel = '', filterPool = '', filterMonth = '', showInactive = false;
 
-  // Expand state
-  const expRelease = new Set();
+  // Expand state: block columns and JAN rows
+  const blockExp = { common: true, amazon: true, rakuten: false, yahoo: false };
   const expJan = new Set();
 
   function getFiltered() {
@@ -510,223 +621,330 @@ async function pagePricing(el) {
     return r;
   }
 
-  function buildGroups() {
-    const skus = getFiltered();
-    const janMap = {};
-    skus.forEach(s => { (janMap[s.jan_code || 'unknown'] = janMap[s.jan_code || 'unknown'] || []).push(s); });
-    const monthMap = {};
-    Object.entries(janMap).forEach(([jan, js]) => {
-      const rd = js[0]?.release_date;
-      const mk = rd ? rd.slice(0, 7) : '未定';
-      (monthMap[mk] = monthMap[mk] || []).push({ jan, skus: js });
-    });
-    let months = Object.keys(monthMap);
-    months.sort((a, b) => { if (a === '未定') return 1; if (b === '未定') return -1; return b.localeCompare(a); });
-    return months.map(m => ({
-      month: m,
-      label: m === '未定' ? '発売日未定' : m.replace(/^(\d{4})-(\d{1,2})$/, (_, y, mo) => `${y}年${parseInt(mo)}月`),
-      jans: monthMap[m].sort((a, b) => a.jan.localeCompare(b.jan)),
-    }));
+  function getVisibleFields(bk) {
+    const block = FIELD_DEFS[bk];
+    if (!block) return [];
+    return blockExp[bk] ? block.fields : block.fields.filter(f => f.visible);
   }
 
-  function lowestForJan(janSkus) {
+  function getAllVisibleFields() {
+    const result = [];
+    for (const bk of ['common', 'amazon', 'rakuten', 'yahoo']) {
+      for (const f of getVisibleFields(bk)) result.push({ ...f, block: bk });
+    }
+    return result;
+  }
+
+  function lowestForAsin(asin) {
     let low = Infinity;
-    for (const s of janSkus) {
-      for (const o of (offersByAsin[s.asin] || [])) {
-        if (o.seller_id !== ownSellerId && o.price > 0 && o.price < low) low = o.price;
-      }
+    for (const o of (offersByAsin[asin] || [])) {
+      if (o.seller_id !== ownSellerId && o.price > 0 && o.price < low) low = o.price;
     }
     return low === Infinity ? null : low;
   }
 
+  // Cell HTML renderer
+  function cellHtml(field, sku, ctx) {
+    const al = field.align || 'left';
+    let extra = '', content = '';
+
+    switch (field.key) {
+      case 'product_name': {
+        if (ctx.isJan) {
+          content = escHtml(cleanProductName(sku.p_product_name, sku.maker));
+        } else {
+          const unit = UNIT_LABELS[sku.sale_unit] || sku.sale_unit;
+          let nm = sku.product_name ? sku.product_name.replace(/^.*?(【[^】]+】)/, '$1') : '';
+          if (!nm.includes('【')) nm = '【' + unit + '】';
+          content = escHtml(nm);
+        }
+        break;
+      }
+      case 'stock_quantity':
+        content = ctx.isJan ? num(ctx.totalStock) : num(sku.stock_quantity); break;
+      case 'unit_price':
+        content = sku.p_unit_price ? yen(sku.p_unit_price) : '—'; break;
+      case 'maker':
+        content = escHtml(sku.maker || '—'); break;
+      case 'cost_price':
+        content = sku.cost_price_tax_incl ? yen(sku.cost_price_tax_incl) : '—'; break;
+      case 'wholesale_rate':
+        content = sku.p_wholesale_rate ? (sku.p_wholesale_rate * 100).toFixed(0) + '%' : '—'; break;
+      case 'release_date':
+        content = sku.release_date ? fmtDateShort(sku.release_date) : '—'; break;
+      case 'inventory_pool':
+        content = sku.inventory_pool || '—'; break;
+      case 'amz_price': {
+        const p = priceOv[sku.sku_code] ?? sku.current_price;
+        if (ctx.isJan) {
+          const bx = ctx.janSkus.find(s => s.sale_unit === 'bx');
+          content = bx ? yen(priceOv[bx.sku_code] ?? bx.current_price) : '—';
+        } else if (sku.sale_unit === 'bx') {
+          content = `<input type="number" class="inline-inp" data-action="price" data-sku="${escHtml(sku.sku_code)}" data-unit="bx" value="${p||''}">`;
+        } else {
+          content = yen(p);
+        }
+        break;
+      }
+      case 'amz_level': {
+        const lv = levelOv[sku.sku_code] || sku.pricing_level;
+        if (ctx.isJan) {
+          const bx = ctx.janSkus.find(s => s.sale_unit === 'bx');
+          const blv = bx ? (levelOv[bx.sku_code] || bx.pricing_level) : null;
+          content = blv ? `<span class="badge ${LEVEL_COLORS[blv]||'badge-gray'} text-xs">${escHtml(blv)}</span>` : '—';
+        } else {
+          content = `<select class="inline-sel" data-action="level" data-sku="${escHtml(sku.sku_code)}">${LEVEL_OPTIONS.map(l => `<option value="${l}" ${lv===l?'selected':''}>${l}</option>`).join('')}</select>`;
+        }
+        break;
+      }
+      case 'amz_lowest': {
+        const low = ctx.lowestPrice;
+        if (low != null) {
+          content = yen(low);
+          const p = priceOv[sku.sku_code] ?? sku.current_price;
+          if (p && low < p) extra = ' text-red';
+          else if (p && low > p) extra = ' text-green';
+        } else content = '—';
+        break;
+      }
+      case 'amz_sellers': {
+        const cnt = (offersByAsin[ctx.asin] || []).length;
+        content = cnt > 0 ? String(cnt) : '—'; break;
+      }
+      case 'amz_sales_30d': {
+        const m = salesByJanMall[sku.jan_code] || {};
+        content = String((m['02'] || { qty: 0 }).qty); break;
+      }
+      case 'asin':
+        content = escHtml(sku.asin || '—'); extra = ' font-mono'; break;
+      case 'amz_calc_price': {
+        if (ctx.isJan) { content = '—'; break; }
+        content = yen(sku.calculated_price); break;
+      }
+      case 'amz_diff': {
+        if (ctx.isJan) { content = '—'; break; }
+        const p = priceOv[sku.sku_code] ?? sku.current_price;
+        const c = sku.calculated_price;
+        if (p && c) {
+          const d = c - p;
+          content = (d > 0 ? '+' : '') + num(d);
+          extra = d > 0 ? ' text-green' : d < 0 ? ' text-red' : '';
+        } else content = '—';
+        break;
+      }
+      case 'amz_profit': {
+        if (ctx.isJan) { content = '—'; break; }
+        const p = priceOv[sku.sku_code] ?? sku.current_price;
+        const cost = sku.cost_price_tax_incl;
+        if (p && cost) {
+          const gp = p - cost;
+          const gr = p > 0 ? (p - cost) / p : 0;
+          content = yen(gp) + ' (' + (gr * 100).toFixed(1) + '%)';
+          extra = gp < 0 ? ' text-red' : '';
+        } else content = '—';
+        break;
+      }
+      case 'amz_multiplier': {
+        if (ctx.isJan) { content = '—'; break; }
+        const m = multOv[sku.sku_code] ?? sku.price_multiplier;
+        const hasBx = ctx.janSkus.some(x => x.sale_unit === 'bx');
+        if (sku.sale_unit !== 'bx' && hasBx) {
+          content = `<input type="number" step="0.01" class="inline-inp" style="width:55px" data-action="mult" data-sku="${escHtml(sku.sku_code)}" value="${m||''}">`;
+        } else {
+          content = m ? m.toFixed(2) : '—';
+        }
+        break;
+      }
+      case 'amz_yield': {
+        if (ctx.isJan) { content = '—'; break; }
+        const y = yieldOv[sku.sku_code] ?? sku.yield_per_box;
+        if (['cp','as','tp'].includes(sku.sale_unit)) {
+          content = `<input type="number" min="1" class="inline-inp" style="width:50px" data-action="yield" data-sku="${escHtml(sku.sku_code)}" value="${y||''}">`;
+        } else {
+          content = y != null ? String(y) : '—';
+        }
+        break;
+      }
+      case 'amz_keepa_new': {
+        const kd = keepaByAsin[ctx.asin];
+        content = kd?.current_new_price ? yen(kd.current_new_price) : '—'; break;
+      }
+      case 'amz_bb_price': {
+        const kd = keepaByAsin[ctx.asin];
+        content = kd?.current_buy_box_price ? yen(kd.current_buy_box_price) : '—'; break;
+      }
+      case 'amz_ranking': {
+        const ranks = rankByAsin[ctx.asin] || [];
+        if (ranks.length > 0) {
+          const best = ranks.sort((a, b) => (a.rank || Infinity) - (b.rank || Infinity))[0];
+          content = best.rank ? '#' + num(best.rank) : '—';
+        } else content = '—';
+        break;
+      }
+      case 'amz_keepa_graph': {
+        if (ctx.asin && keepaApiKey) {
+          content = `<img src="https://graph.keepa.com/pricehistory.png?asin=${escHtml(ctx.asin)}&amp;domain=5&amp;range=180&amp;width=600&amp;height=180&amp;key=${escHtml(keepaApiKey)}" alt="Keepa" loading="lazy" style="max-width:300px;height:auto">`;
+        } else content = '—';
+        break;
+      }
+      case 'rk_sales_30d': {
+        const m = salesByJanMall[sku.jan_code] || {};
+        content = String((m['01'] || { qty: 0 }).qty); break;
+      }
+      case 'rk_revenue_30d': {
+        const m = salesByJanMall[sku.jan_code] || {};
+        content = yen((m['01'] || { revenue: 0 }).revenue); break;
+      }
+      case 'yh_sales_30d': {
+        const m = salesByJanMall[sku.jan_code] || {};
+        content = String((m['03'] || { qty: 0 }).qty); break;
+      }
+      case 'yh_revenue_30d': {
+        const m = salesByJanMall[sku.jan_code] || {};
+        content = yen((m['03'] || { revenue: 0 }).revenue); break;
+      }
+      default: content = '—';
+    }
+    return `<td style="text-align:${al}" class="${extra}">${content}</td>`;
+  }
+
   function render() {
-    const groups = buildGroups();
+    const filtered = getFiltered();
     const allMonths = [...new Set(allSkus.map(s => s.release_date ? s.release_date.slice(0, 7) : '未定'))].sort((a, b) => {
       if (a === '未定') return 1; if (b === '未定') return -1; return b.localeCompare(a);
     });
     const allMakers = [...new Set(allSkus.map(s => s.maker).filter(Boolean))].sort();
-    const totalSkus = groups.reduce((s, g) => s + g.jans.reduce((s2, j) => s2 + j.skus.length, 0), 0);
 
-    el.innerHTML = `
+    // Group by JAN
+    const janMap = {};
+    filtered.forEach(s => { (janMap[s.jan_code || 'unknown'] = janMap[s.jan_code || 'unknown'] || []).push(s); });
+    for (const jan in janMap) janMap[jan].sort((a, b) => (UNIT_ORDER[a.sale_unit] ?? 9) - (UNIT_ORDER[b.sale_unit] ?? 9));
+    const sortedJans = Object.keys(janMap).sort();
+    const visibleFields = getAllVisibleFields();
+
+    let html = `
       <div class="flex items-center justify-between mb-4">
         <h2 class="text-lg font-bold">プライシング</h2>
-        <span class="text-sm text-gray-500">${totalSkus}件</span>
+        <span class="text-sm text-gray-500">JAN: ${sortedJans.length} / SKU: ${filtered.length}</span>
       </div>
       <div class="flex flex-wrap gap-2 mb-4">
-        <input type="text" class="input w-56" placeholder="検索（商品名・JAN・SKU）" value="${escHtml(search)}" id="pf-search">
+        <input type="text" class="input w-56" placeholder="検索（商品名・JAN・SKU・ASIN）" value="${escHtml(search)}" id="pf-search">
         <select class="input" id="pf-maker"><option value="">全メーカー</option>${allMakers.map(m => `<option value="${escHtml(m)}" ${filterMaker===m?'selected':''}>${escHtml(m)}</option>`).join('')}</select>
         <select class="input" id="pf-level"><option value="">全レベル</option>${LEVEL_OPTIONS.map(l => `<option value="${l}" ${filterLevel===l?'selected':''}>${l}</option>`).join('')}</select>
         <select class="input" id="pf-pool"><option value="">全プール</option><option value="box" ${filterPool==='box'?'selected':''}>BOX</option><option value="set" ${filterPool==='set'?'selected':''}>SET</option></select>
         <select class="input" id="pf-month"><option value="">全月</option>${allMonths.map(m => `<option value="${m}" ${filterMonth===m?'selected':''}>${m === '未定' ? '未定' : m.replace(/^(\d{4})-(\d{1,2})$/, (_, y, mo) => y+'年'+parseInt(mo)+'月')}</option>`).join('')}</select>
         <label class="flex items-center gap-1 text-sm text-gray-600"><input type="checkbox" id="pf-inactive" ${showInactive?'checked':''}>非アクティブ</label>
       </div>
-      <div id="pricing-groups">
-        ${groups.length ? groups.map(g => renderRelease(g)).join('') : '<p class="text-sm text-gray-500 py-8 text-center">該当するSKUがありません</p>'}
-      </div>
     `;
+
+    // Table
+    html += '<div class="pricing-wrap"><table class="pricing-table">';
+
+    // Header row 1: block headers
+    html += '<thead><tr>';
+    html += '<th class="sticky-col" style="min-width:120px">JAN / SKU</th>';
+    for (const bk of ['common','amazon','rakuten','yahoo']) {
+      const block = FIELD_DEFS[bk];
+      const fields = getVisibleFields(bk);
+      const expanded = blockExp[bk];
+      const hiddenCount = block.fields.length - block.fields.filter(f => f.visible).length;
+      html += `<th colspan="${fields.length}" class="block-hdr" data-block="${bk}" style="background:${block.color}11; color:${block.color}; border-bottom: 2px solid ${block.color}">`;
+      html += `<span class="arr ${expanded?'open':''}">&#9654;</span>${block.label}`;
+      if (hiddenCount > 0 && !expanded) html += ` <span style="font-weight:400;font-size:10px">(+${hiddenCount})</span>`;
+      html += '</th>';
+    }
+    html += '</tr>';
+
+    // Header row 2: field labels
+    html += '<tr><th class="sticky-col" style="background:#f9fafb"></th>';
+    for (const f of visibleFields) {
+      const block = FIELD_DEFS[f.block];
+      html += `<th style="background:${block.color}06; font-size:11px; font-weight:500; text-align:${f.align||'left'}">${f.label}</th>`;
+    }
+    html += '</tr></thead>';
+
+    // Body
+    html += '<tbody>';
+    if (sortedJans.length === 0) {
+      html += `<tr><td colspan="${1+visibleFields.length}" style="text-align:center;padding:2rem;color:#6b7280">該当するSKUがありません</td></tr>`;
+    }
+    for (const jan of sortedJans) {
+      const janSkus = janMap[jan];
+      const expanded = expJan.has(jan);
+      const boxSku = janSkus.find(s => s.sale_unit === 'bx');
+      const primaryAsin = (boxSku?.asin) || (janSkus.find(s => s.asin)?.asin) || '';
+      let totalStock = 0;
+      janSkus.forEach(s => totalStock += (s.stock_quantity ?? 0));
+      const lowestPrice = lowestForAsin(primaryAsin);
+
+      // JAN row
+      html += `<tr class="jan-tr" data-jan="${escHtml(jan)}">`;
+      html += `<td class="sticky-col" style="background:#f1f5f9"><span class="arr ${expanded?'open':''}">&#9654;</span> <span class="font-mono text-xs">${escHtml(jan)}</span></td>`;
+      const ctx = { isJan: true, janSkus, totalStock, lowestPrice, asin: primaryAsin };
+      const rep = boxSku || janSkus[0];
+      for (const f of visibleFields) html += cellHtml(f, rep, ctx);
+      html += '</tr>';
+
+      // SKU rows
+      for (const sku of janSkus) {
+        const isBox = sku.sale_unit === 'bx';
+        const skuCtx = { isJan: false, janSkus, totalStock, lowestPrice: lowestForAsin(sku.asin || ''), asin: sku.asin || '' };
+        html += `<tr class="sku-tr ${isBox?'bx-row':''} ${expanded?'':'hidden-row'}" data-jan-child="${escHtml(jan)}">`;
+        html += `<td class="sticky-col font-mono text-xs" style="padding-left:24px;background:${isBox?'rgba(251,191,36,0.06)':'#fff'}">${escHtml(sku.sku_code)} <span class="badge ${UNIT_BADGE[sku.sale_unit]||'badge-gray'}" style="font-size:10px">${escHtml(UNIT_LABELS[sku.sale_unit]||sku.sale_unit)}</span></td>`;
+        for (const f of visibleFields) html += cellHtml(f, sku, skuCtx);
+        html += '</tr>';
+      }
+
+      // Detail row (competitor table + keepa graph) when expanded and Amazon block expanded
+      if (expanded && blockExp.amazon && primaryAsin) {
+        const aOffers = offersByAsin[primaryAsin] || [];
+        if (aOffers.length > 0 || keepaApiKey) {
+          const totalCols = 1 + visibleFields.length;
+          html += `<tr class="detail-tr" data-jan-child="${escHtml(jan)}"><td colspan="${totalCols}"><div class="detail-flex">`;
+
+          if (aOffers.length > 0) {
+            const sorted = [...aOffers].sort((a, b) => {
+              if (a.seller_id === ownSellerId) return -1;
+              if (b.seller_id === ownSellerId) return 1;
+              return (a.price || 0) - (b.price || 0);
+            });
+            const lowestNonOwn = sorted.filter(o => o.seller_id !== ownSellerId && o.price > 0).map(o => o.price).sort((a,b) => a-b)[0];
+            html += '<div><table class="comp-tbl"><thead><tr><th>セラー</th><th>価格</th><th>FBA</th><th>BB</th><th>状態</th><th>操作</th></tr></thead><tbody>';
+            for (const o of sorted) {
+              const isOwn = o.seller_id === ownSellerId;
+              const fl = resolveSellerFlag(o.seller_id, jan, primaryAsin, sellerMap, janOvMap, asinOvMap);
+              const exc = fl?.flag === 'exclude';
+              const foc = fl?.flag === 'focus';
+              const isLow = o.price === lowestNonOwn && !isOwn;
+              const dn = sellerMap[o.seller_id]?.display_name || o.seller_name || (o.seller_id?.slice(0,8)+'...');
+              html += `<tr class="${isOwn?'own':''} ${isLow&&!isOwn?'low':''}">`;
+              html += `<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis">${escHtml(dn)}${isOwn?' <span style="color:#2563eb">(自社)</span>':''}</td>`;
+              html += `<td style="text-align:right;font-family:monospace">${yen(o.price)}</td>`;
+              html += `<td>${o.is_fba?'FBA':''}</td><td>${o.is_buy_box?'BB':''}</td>`;
+              html += `<td>${fl?`<span class="badge ${exc?'badge-red':'badge-blue'}" style="font-size:10px">${exc?'除外':'注目'}(${fl.scope})</span>`:''}</td>`;
+              html += '<td>';
+              if (!isOwn) {
+                if (!exc) html += `<button class="btn btn-secondary text-xs" style="padding:1px 6px" data-action="flag" data-seller="${escHtml(o.seller_id)}" data-jan="${escHtml(jan)}" data-asin="${escHtml(primaryAsin)}" data-flag="exclude">除外</button> `;
+                if (!foc) html += `<button class="btn btn-secondary text-xs" style="padding:1px 6px" data-action="flag" data-seller="${escHtml(o.seller_id)}" data-jan="${escHtml(jan)}" data-asin="${escHtml(primaryAsin)}" data-flag="focus">注目</button> `;
+                if (fl && fl.scope !== 'G') html += `<button class="btn btn-secondary text-xs" style="padding:1px 6px" data-action="flag-clear" data-seller="${escHtml(o.seller_id)}" data-jan="${escHtml(jan)}" data-asin="${escHtml(primaryAsin)}" data-scope="${fl.scope}">解除</button>`;
+              }
+              html += '</td></tr>';
+            }
+            html += '</tbody></table></div>';
+          }
+
+          if (keepaApiKey && primaryAsin) {
+            html += `<div class="keepa-img"><img src="https://graph.keepa.com/pricehistory.png?asin=${escHtml(primaryAsin)}&amp;domain=5&amp;range=180&amp;width=600&amp;height=180&amp;key=${escHtml(keepaApiKey)}" alt="Keepa" loading="lazy"></div>`;
+          }
+
+          html += '</div></td></tr>';
+        }
+      }
+    }
+    html += '</tbody></table></div>';
+
+    el.innerHTML = html;
     bindEvents();
-  }
-
-  function renderRelease(g) {
-    const open = expRelease.has(g.month);
-    const sc = g.jans.reduce((s, j) => s + j.skus.length, 0);
-    return `<div class="release-group">
-      <div class="release-header" data-month="${escHtml(g.month)}">
-        <span class="chevron ${open?'open':''}">▶</span>
-        <span>${escHtml(g.label)}</span>
-        <span class="badge badge-gray">${g.jans.length} JAN / ${sc} SKU</span>
-      </div>
-      ${open ? `<div class="release-content">${g.jans.map(j => renderJan(j)).join('')}</div>` : ''}
-    </div>`;
-  }
-
-  function renderJan(jd) {
-    const { jan, skus } = jd;
-    const open = expJan.has(jan);
-    const maker = skus[0]?.maker;
-    const hue = makerToHue(maker);
-    const pName = cleanProductName(skus[0]?.p_product_name, maker);
-    const basePrice = skus.find(s => s.sale_unit === 'bx')?.p_unit_price || skus[0]?.p_unit_price;
-    const lowest = lowestForJan(skus);
-    const jSales = salesByJan[jan] || [];
-    const now3d = Date.now() - 3 * 86400000;
-    const s3d = jSales.filter(r => new Date(r.order_date).getTime() >= now3d).reduce((s, r) => s + (Number(r.amount) || 0), 0);
-
-    return `<div class="jan-group">
-      <div class="jan-header" data-jan="${escHtml(jan)}">
-        <span class="chevron ${open?'open':''}">▶</span>
-        <span class="font-mono text-xs text-gray-500">${escHtml(jan)}</span>
-        <span class="font-medium truncate max-w-[300px]" title="${escHtml(skus[0]?.p_product_name)}">${escHtml(pName)}</span>
-        ${maker ? `<span class="maker-badge" style="background:hsl(${hue},60%,90%);color:hsl(${hue},40%,30%)">${escHtml(maker)}</span>` : ''}
-        <span class="ml-auto flex items-center gap-3 text-xs text-gray-500">
-          ${basePrice ? `<span>定価 ${yen(basePrice)}</span>` : ''}
-          ${lowest ? `<span class="text-blue-600">最安 ${yen(lowest)}</span>` : ''}
-          ${s3d > 0 ? `<span class="text-emerald-600">3d: ${s3d}個</span>` : ''}
-          <span class="badge badge-gray">${skus.length} SKU</span>
-        </span>
-      </div>
-      ${open ? renderJanContent(jan, skus) : ''}
-    </div>`;
-  }
-
-  function renderJanContent(jan, skus) {
-    const inv = calcBoxInventory(skus, yieldOv);
-    const jSales = salesByJan[jan] || [];
-    const total30d = jSales.reduce((s, r) => s + (Number(r.amount) || 0), 0);
-    const now3d = Date.now() - 3 * 86400000;
-    const s3d = jSales.filter(r => new Date(r.order_date).getTime() >= now3d).reduce((s, r) => s + (Number(r.amount) || 0), 0);
-    const avgDaily = total30d / 30;
-    const dos = avgDaily > 0 && inv.totalEq > 0 ? inv.totalEq / avgDaily : null;
-    const sorted = [...skus].sort((a, b) => (UNIT_ORDER[a.sale_unit] ?? 9) - (UNIT_ORDER[b.sale_unit] ?? 9));
-    const asins = [...new Set(skus.map(s => s.asin).filter(Boolean))];
-    const kp = asins.map(a => keepaByAsin[a]).find(k => k) || null;
-    const allRanks = asins.flatMap(a => rankByAsin[a] || []);
-    const topRank = allRanks.sort((a, b) => (a.rank || Infinity) - (b.rank || Infinity))[0];
-
-    return `<div class="jan-content">
-      <div class="metrics-row">
-        <span class="metrics-item"><span class="text-gray-400">定価</span> ${yen(skus.find(s => s.sale_unit === 'bx')?.p_unit_price || skus[0]?.p_unit_price)}</span>
-        ${kp ? `
-          <span class="metrics-item"><span class="text-gray-400">Keepa新品</span> ${yen(kp.current_new_price)}</span>
-          <span class="metrics-item"><span class="text-gray-400">BB</span> ${yen(kp.current_buy_box_price)}</span>
-          <span class="metrics-item"><span class="text-gray-400">出品者</span> ${kp.current_offer_count_new ?? '—'}社</span>
-        ` : ''}
-        ${topRank ? `<span class="metrics-item"><span class="text-gray-400">${escHtml(topRank.category_name || 'ランキング')}</span> #${num(topRank.rank)}</span>` : ''}
-        <span class="metrics-item"><span class="text-gray-400">3日</span> <b>${s3d}個</b></span>
-        <span class="metrics-item"><span class="text-gray-400">30日</span> ${total30d}個</span>
-        <span class="metrics-item" title="合計ボックス換算">
-          <span class="text-gray-400">在庫</span>
-          <b>${inv.totalEq.toFixed(1)}BOX</b>
-          <span class="text-gray-400">(BOX ${inv.boxEq.toFixed(1)} / SET ${inv.setEq.toFixed(1)})</span>
-        </span>
-        ${dos != null ? `<span class="metrics-item"><span class="badge ${dos < 14 ? 'badge-red' : dos < 30 ? 'badge-amber' : 'badge-gray'}">DOS ${dos.toFixed(0)}日</span></span>` : ''}
-      </div>
-
-      <div class="overflow-x-auto mb-2">
-        <table class="data-table">
-          <thead><tr>
-            <th>種別</th><th>商品名</th><th class="text-right">自社価格</th><th class="text-right">算出価格</th>
-            <th class="text-right">差額</th><th class="text-right">粗利</th><th class="text-right">倍率</th>
-            <th class="text-right">収量</th><th class="text-right">出品者</th><th>レベル</th><th>更新</th>
-          </tr></thead>
-          <tbody>${sorted.map(s => renderSkuRow(s, skus)).join('')}</tbody>
-        </table>
-      </div>
-
-      ${asins.map(a => renderCompTable(a, jan)).join('')}
-    </div>`;
-  }
-
-  function renderSkuRow(s, janSkus) {
-    const lv = levelOv[s.sku_code] || s.pricing_level;
-    const yld = yieldOv[s.sku_code] ?? s.yield_per_box;
-    const price = priceOv[s.sku_code] ?? s.current_price;
-    const mult = multOv[s.sku_code] ?? s.price_multiplier;
-    const calc = s.calculated_price;
-    const diff = (price && calc) ? calc - price : null;
-    const isBx = s.sale_unit === 'bx';
-    const hasBx = janSkus.some(x => x.sale_unit === 'bx');
-    const isSet = ['cp', 'as', 'tp'].includes(s.sale_unit);
-    const cost = s.cost_price_tax_incl;
-    const gp = price && cost ? price - cost : null;
-    const gr = price && cost && price > 0 ? (price - cost) / price : null;
-    const canPrice = isBx || (lv === 'OFF' && mult);
-    const canMult = !isBx && hasBx;
-    const shortName = s.product_name ? truncate(s.product_name.replace(/^【[^】]*】\s*/, ''), 20) : '—';
-
-    return `<tr class="${isBx ? 'sku-row-bx' : ''} ${!s.is_active ? 'opacity-50' : ''}">
-      <td><span class="badge ${UNIT_BADGE[s.sale_unit] || 'badge-gray'} text-xs">${escHtml(UNIT_LABELS[s.sale_unit] || s.sale_unit)}</span></td>
-      <td class="text-xs max-w-[180px] truncate" title="${escHtml(s.product_name)}&#10;${escHtml(s.sku_code)}">${escHtml(shortName)}</td>
-      <td class="text-right font-mono text-xs">${canPrice ? `<input type="number" class="input text-right w-20 text-xs price-edit" data-sku="${escHtml(s.sku_code)}" value="${price||''}">` : yen(price)}</td>
-      <td class="text-right font-mono text-xs text-gray-500">${yen(calc)}</td>
-      <td class="text-right font-mono text-xs ${diff > 0 ? 'text-emerald-600' : diff < 0 ? 'text-red-600' : 'text-gray-400'}">${diff != null ? (diff > 0 ? '+' : '') + num(diff) : '—'}</td>
-      <td class="text-right text-xs ${gp != null && gp < 0 ? 'text-red-600' : ''}" title="${gr != null ? '粗利率 '+(gr*100).toFixed(1)+'%' : ''}">${gp != null ? yen(gp)+' ('+(gr*100).toFixed(1)+'%)' : '—'}</td>
-      <td class="text-right text-xs">${canMult ? `<input type="number" step="0.01" min="0.01" class="input text-right w-16 text-xs mult-edit" data-sku="${escHtml(s.sku_code)}" value="${mult||''}">` : `<span class="text-gray-400">${mult ? mult.toFixed(2) : '—'}</span>`}</td>
-      <td class="text-right text-xs">${isSet ? `<input type="number" min="1" class="input text-right w-14 text-xs yield-edit" data-sku="${escHtml(s.sku_code)}" value="${yld||''}">` : `<span class="text-gray-400">${yld || '—'}</span>`}</td>
-      <td class="text-right text-xs">${s.offer_count != null ? s.offer_count : '—'}</td>
-      <td><select class="input text-xs py-0.5 px-1 level-edit" data-sku="${escHtml(s.sku_code)}">${LEVEL_OPTIONS.map(l => `<option value="${l}" ${lv===l?'selected':''}>${l}</option>`).join('')}</select></td>
-      <td class="text-xs text-gray-400">${fmtShort(s.updated_at)}</td>
-    </tr>`;
-  }
-
-  function renderCompTable(asin, jan) {
-    const aOffers = offersByAsin[asin] || [];
-    if (!aOffers.length) return '';
-    const sorted = [...aOffers].sort((a, b) => {
-      if (a.seller_id === ownSellerId) return -1;
-      if (b.seller_id === ownSellerId) return 1;
-      return (a.price || 0) - (b.price || 0);
-    });
-    const lowestNonOwn = sorted.filter(o => o.seller_id !== ownSellerId && o.price > 0).map(o => o.price).sort((a,b) => a-b)[0];
-
-    return `<div class="mt-2 mb-1">
-      <div class="text-xs font-medium text-gray-500 mb-1">競合オファー <span class="font-mono">${escHtml(asin)}</span> (${sorted.length}件)</div>
-      <div class="overflow-x-auto">
-        <table class="data-table">
-          <thead><tr><th>セラー</th><th class="text-right">価格</th><th>FBA</th><th>BB</th><th>状態</th><th>操作</th></tr></thead>
-          <tbody>${sorted.map(o => {
-            const isOwn = o.seller_id === ownSellerId;
-            const fl = resolveSellerFlag(o.seller_id, jan, asin, sellerMap, janOvMap, asinOvMap);
-            const exc = fl?.flag === 'exclude';
-            const foc = fl?.flag === 'focus';
-            const isLow = o.price === lowestNonOwn && !isOwn;
-            const dn = sellerMap[o.seller_id]?.display_name || o.seller_name || (o.seller_id?.slice(0,8)+'...');
-            return `<tr class="${isOwn ? 'bg-blue-50/60' : ''} ${exc ? 'opacity-50 line-through' : ''} ${isLow ? 'border-l-2 border-l-blue-500' : ''}">
-              <td class="text-xs ${o.is_buy_box?'font-bold':''}">${escHtml(dn)}${isOwn?' <span class="text-blue-600">(自社)</span>':''}</td>
-              <td class="text-right font-mono text-xs">${yen(o.price)}</td>
-              <td class="text-xs">${o.is_fba?'<span class="badge badge-blue text-xs">FBA</span>':''}</td>
-              <td class="text-xs">${o.is_buy_box?'<span class="font-bold text-amber-500">*</span>':''}</td>
-              <td class="text-xs">${fl?`<span class="badge ${exc?'badge-red':'badge-blue'} text-xs">${exc?'除外':'注目'}(${fl.scope})</span>`:''}</td>
-              <td class="text-xs">${!isOwn?`
-                ${!exc?`<button class="btn btn-secondary text-xs py-0 px-1.5 flag-btn" data-seller="${escHtml(o.seller_id)}" data-jan="${escHtml(jan)}" data-asin="${escHtml(asin)}" data-flag="exclude">除外</button>`:''}
-                ${!foc?`<button class="btn btn-secondary text-xs py-0 px-1.5 flag-btn" data-seller="${escHtml(o.seller_id)}" data-jan="${escHtml(jan)}" data-asin="${escHtml(asin)}" data-flag="focus">注目</button>`:''}
-                ${fl&&fl.scope!=='G'?`<button class="btn btn-secondary text-xs py-0 px-1.5 flag-clear" data-seller="${escHtml(o.seller_id)}" data-jan="${escHtml(jan)}" data-asin="${escHtml(asin)}" data-scope="${fl.scope}">解除</button>`:''}
-              `:''}</td>
-            </tr>`;
-          }).join('')}</tbody>
-        </table>
-      </div>
-    </div>`;
   }
 
   function bindEvents() {
@@ -738,85 +956,87 @@ async function pagePricing(el) {
     document.getElementById('pf-month')?.addEventListener('change', e => { filterMonth = e.target.value; render(); });
     document.getElementById('pf-inactive')?.addEventListener('change', e => { showInactive = e.target.checked; render(); });
 
-    // Release expand/collapse
-    el.querySelectorAll('.release-header').forEach(h => {
-      h.addEventListener('click', () => {
-        const m = h.dataset.month;
-        if (expRelease.has(m)) expRelease.delete(m); else expRelease.add(m);
+    // Block header clicks (horizontal accordion)
+    el.querySelectorAll('.block-hdr').forEach(th => {
+      th.addEventListener('click', () => {
+        const bk = th.dataset.block;
+        blockExp[bk] = !blockExp[bk];
         render();
       });
     });
 
-    // JAN expand/collapse
-    el.querySelectorAll('.jan-header').forEach(h => {
-      h.addEventListener('click', () => {
-        const j = h.dataset.jan;
+    // JAN row clicks (vertical accordion)
+    el.querySelectorAll('.jan-tr').forEach(tr => {
+      tr.addEventListener('click', (e) => {
+        if (e.target.tagName === 'SELECT' || e.target.tagName === 'INPUT' || e.target.tagName === 'OPTION') return;
+        const j = tr.dataset.jan;
         if (expJan.has(j)) expJan.delete(j); else expJan.add(j);
         render();
       });
     });
 
-    // Level change (auto-save)
-    el.querySelectorAll('.level-edit').forEach(sel => {
-      sel.addEventListener('change', async e => {
-        const sku = e.target.dataset.sku, val = e.target.value;
-        levelOv[sku] = val;
-        const { error } = await sb.from('product_skus').update({ pricing_level: val }).eq('sku_code', sku);
-        if (error) toast('保存失敗: ' + error.message, 'error');
-        else { toast('レベル変更: ' + val); const s = allSkus.find(x => x.sku_code === sku); if (s) s.pricing_level = val; }
-      });
-    });
+    // Event delegation for inline editing and seller flags
+    el.addEventListener('change', async (e) => {
+      const t = e.target;
+      const action = t.dataset?.action;
+      const sku = t.dataset?.sku;
+      if (!action || !sku) return;
 
-    // Price edit (auto-save on change)
-    el.querySelectorAll('.price-edit').forEach(inp => {
-      inp.addEventListener('change', async e => {
-        const sku = e.target.dataset.sku, val = e.target.value ? parseInt(e.target.value) : null;
+      if (action === 'price') {
+        const val = t.value ? parseInt(t.value) : null;
         if (!val || val <= 0) return;
         priceOv[sku] = val;
         const { error } = await sb.from('product_skus').update({ current_price: val }).eq('sku_code', sku);
         if (error) toast('保存失敗: ' + error.message, 'error');
-        else { toast('価格更新: ' + yen(val)); const s = allSkus.find(x => x.sku_code === sku); if (s) s.current_price = val; }
-      });
-    });
-
-    // Multiplier edit
-    el.querySelectorAll('.mult-edit').forEach(inp => {
-      inp.addEventListener('change', async e => {
-        const sku = e.target.dataset.sku, val = e.target.value ? parseFloat(e.target.value) : null;
+        else {
+          toast('価格更新: ' + yen(val));
+          const s = allSkus.find(x => x.sku_code === sku); if (s) s.current_price = val;
+          // Cascade to linked SKUs if BOX
+          if (t.dataset.unit === 'bx') {
+            const linked = allSkus.filter(x => x.jan_code === s?.jan_code && x.sku_code !== sku && x.pricing_level === 'OFF' && x.price_multiplier != null);
+            for (const lk of linked) {
+              const np = Math.floor((val * lk.price_multiplier - 80) / 100) * 100 + 80;
+              priceOv[lk.sku_code] = np; lk.current_price = np;
+              await sb.from('product_skus').update({ current_price: np }).eq('sku_code', lk.sku_code);
+            }
+            render();
+          }
+        }
+      } else if (action === 'level') {
+        levelOv[sku] = t.value;
+        const { error } = await sb.from('product_skus').update({ pricing_level: t.value }).eq('sku_code', sku);
+        if (error) toast('保存失敗: ' + error.message, 'error');
+        else { toast('レベル変更: ' + t.value); const s = allSkus.find(x => x.sku_code === sku); if (s) s.pricing_level = t.value; }
+      } else if (action === 'mult') {
+        const val = t.value ? parseFloat(t.value) : null;
         if (!val || val <= 0) return;
         multOv[sku] = val;
         const { error } = await sb.from('product_skus').update({ price_multiplier: val }).eq('sku_code', sku);
         if (error) toast('保存失敗: ' + error.message, 'error');
         else { toast('倍率更新: ' + val.toFixed(2)); const s = allSkus.find(x => x.sku_code === sku); if (s) s.price_multiplier = val; }
-      });
-    });
-
-    // Yield edit
-    el.querySelectorAll('.yield-edit').forEach(inp => {
-      inp.addEventListener('change', async e => {
-        const sku = e.target.dataset.sku, val = e.target.value ? parseInt(e.target.value) : null;
+      } else if (action === 'yield') {
+        const val = t.value ? parseInt(t.value) : null;
         if (!val || val < 1) return;
         yieldOv[sku] = val;
         const { error } = await sb.from('product_skus').update({ yield_per_box: val }).eq('sku_code', sku);
         if (error) toast('保存失敗: ' + error.message, 'error');
         else { toast('収量更新: ' + val); const s = allSkus.find(x => x.sku_code === sku); if (s) s.yield_per_box = val; render(); }
-      });
+      }
     });
 
-    // Seller flag set
-    el.querySelectorAll('.flag-btn').forEach(btn => {
-      btn.addEventListener('click', async () => {
+    // Seller flag buttons (event delegation)
+    el.addEventListener('click', async (e) => {
+      const btn = e.target.closest('[data-action="flag"]');
+      if (btn) {
         const { seller, jan, flag } = btn.dataset;
         const { error } = await sb.from('seller_jan_overrides').upsert({ seller_id: seller, jan_code: jan, flag }, { onConflict: 'seller_id,jan_code' });
         if (error) toast('設定失敗: ' + error.message, 'error');
         else { toast(`${flag==='exclude'?'除外':'注目'}に設定`); janOvMap[seller+':'+jan] = { seller_id: seller, jan_code: jan, flag }; render(); }
-      });
-    });
-
-    // Seller flag clear
-    el.querySelectorAll('.flag-clear').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        const { seller, jan, asin, scope } = btn.dataset;
+        return;
+      }
+      const clr = e.target.closest('[data-action="flag-clear"]');
+      if (clr) {
+        const { seller, jan, asin, scope } = clr.dataset;
         if (scope === 'J') {
           const { error } = await sb.from('seller_jan_overrides').delete().eq('seller_id', seller).eq('jan_code', jan);
           if (error) toast('解除失敗: ' + error.message, 'error');
@@ -826,8 +1046,13 @@ async function pagePricing(el) {
           if (error) toast('解除失敗: ' + error.message, 'error');
           else { toast('フラグ解除'); delete asinOvMap[seller+':'+asin]; render(); }
         }
-      });
+      }
     });
+
+    // Prevent JAN toggle when interacting with inputs/selects
+    el.addEventListener('click', (e) => {
+      if (e.target.dataset?.action) e.stopPropagation();
+    }, true);
   }
 
   render();
@@ -869,7 +1094,8 @@ async function pageOrders(el) {
     if (dateFrom) query = query.gte('order_date', dateFrom + 'T00:00:00');
     if (dateTo) query = query.lte('order_date', dateTo + 'T23:59:59');
     if (search) {
-      query = query.or(`item_code.ilike.%${search}%,item_name.ilike.%${search}%,jan_cd.ilike.%${search}%`);
+      const s = search.replace(/[.,()"'\\]/g, '');
+      if (s) query = query.or(`item_code.ilike.%${s}%,item_name.ilike.%${s}%,jan_cd.ilike.%${s}%`);
     }
 
     query = query.order(sortCol, { ascending: sortDir === 'asc' });
@@ -1213,6 +1439,7 @@ async function pageSettings(el) {
         <button class="btn ${activeTab==='settings'?'btn-primary':'btn-secondary'} text-xs" onclick="document.dispatchEvent(new CustomEvent('settings-tab',{detail:'settings'}))">システム設定</button>
         <button class="btn ${activeTab==='sellers'?'btn-primary':'btn-secondary'} text-xs" onclick="document.dispatchEvent(new CustomEvent('settings-tab',{detail:'sellers'}))">セラーマスター</button>
         <button class="btn ${activeTab==='ignored'?'btn-primary':'btn-secondary'} text-xs" onclick="document.dispatchEvent(new CustomEvent('settings-tab',{detail:'ignored'}))">無視セラー</button>
+        <button class="btn ${activeTab==='notify'?'btn-primary':'btn-secondary'} text-xs" onclick="document.dispatchEvent(new CustomEvent('settings-tab',{detail:'notify'}))">通知設定</button>
         ${isAdmin ? `<button class="btn ${activeTab==='users'?'btn-primary':'btn-secondary'} text-xs" onclick="document.dispatchEvent(new CustomEvent('settings-tab',{detail:'users'}))">アクセス管理</button>` : ''}
       </div>
       <div id="settings-content"></div>
@@ -1377,6 +1604,135 @@ async function pageSettings(el) {
           const { error } = await sb.from('allowed_users').delete().eq('email', email);
           if (error) toast('削除失敗: ' + error.message, 'error');
           else { toast(email + ' を削除しました'); allowedUsers = allowedUsers.filter(u => u.email !== email); render(); }
+        });
+      });
+    }
+
+    // Notification settings tab
+    if (activeTab === 'notify') {
+      // Load discord_notify_config
+      const configRow = settings.find(s => s.key === 'discord_notify_config');
+      let notifyConfig = {
+        amazon: { webhook_url: '', fields: ['product_name','amz_price','amz_lowest'], enabled: true },
+        rakuten: { webhook_url: '', fields: ['product_name','rk_sales_30d'], enabled: true },
+        yahoo: { webhook_url: '', fields: ['product_name','yh_sales_30d'], enabled: true },
+      };
+      if (configRow?.value) {
+        try {
+          const parsed = typeof configRow.value === 'string' ? JSON.parse(configRow.value) : configRow.value;
+          notifyConfig = { ...notifyConfig, ...parsed };
+        } catch {}
+      }
+
+      const mallDefs = [
+        { key: 'amazon', label: 'Amazon', color: '#0ea5e9' },
+        { key: 'rakuten', label: '楽天', color: '#dc2626' },
+        { key: 'yahoo', label: 'Yahoo', color: '#9333ea' },
+      ];
+
+      let nh = '<p class="text-xs text-gray-500 mb-4">各モールの注文通知で送信するフィールドとWebhook URLを設定します。</p>';
+
+      for (const mall of mallDefs) {
+        const mc = notifyConfig[mall.key] || { webhook_url: '', fields: [], enabled: true };
+        nh += `<div class="notify-section" data-mall="${mall.key}">`;
+        nh += `<h4><span class="notify-dot" style="background:${mall.color}"></span>${mall.label}</h4>`;
+
+        // Enable toggle
+        nh += `<div class="flex items-center gap-3 mb-2">`;
+        nh += `<label class="toggle-sw"><input type="checkbox" class="notify-enabled" data-mall="${mall.key}" ${mc.enabled!==false?'checked':''}><span class="toggle-sl"></span></label>`;
+        nh += '<span class="text-xs">通知有効</span></div>';
+
+        // Webhook URL
+        nh += `<div class="mb-3"><label class="text-xs text-gray-500 block mb-1">Webhook URL</label>`;
+        nh += `<input type="text" class="input w-full text-xs font-mono notify-webhook" data-mall="${mall.key}" placeholder="https://discord.com/api/webhooks/..." value="${escHtml(mc.webhook_url || '')}"></div>`;
+
+        // Field selection
+        nh += '<div class="text-xs text-gray-500 mb-1">通知フィールド:</div>';
+        for (const [bk, block] of Object.entries(FIELD_DEFS)) {
+          nh += `<div class="field-group-lbl" style="color:${block.color}">${block.label}</div>`;
+          nh += '<div class="field-grid">';
+          for (const f of block.fields) {
+            const checked = (mc.fields || []).includes(f.key);
+            const labelText = f.type === 'image' ? f.label + ' (画像添付)' : f.label;
+            nh += `<label class="field-check"><input type="checkbox" class="notify-field" data-mall="${mall.key}" data-field="${f.key}" ${checked?'checked':''}>${labelText}</label>`;
+          }
+          nh += '</div>';
+        }
+
+        // Test button
+        nh += `<div class="mt-3 flex items-center gap-2">`;
+        nh += `<button class="btn btn-secondary text-xs notify-test" data-mall="${mall.key}">テスト送信</button>`;
+        nh += `<span class="text-xs text-gray-500 notify-test-result" data-mall="${mall.key}"></span></div>`;
+        nh += '</div>';
+      }
+
+      // Save button
+      nh += '<div class="mt-4"><button class="btn btn-primary text-xs" id="save-notify-config">設定を保存</button>';
+      nh += '<span id="notify-save-msg" class="text-xs text-gray-500 ml-3"></span></div>';
+
+      container.innerHTML = nh;
+
+      // Save handler
+      document.getElementById('save-notify-config').addEventListener('click', async () => {
+        const newConfig = {};
+        for (const mall of mallDefs) {
+          const enabled = container.querySelector(`.notify-enabled[data-mall="${mall.key}"]`).checked;
+          const webhook_url = container.querySelector(`.notify-webhook[data-mall="${mall.key}"]`).value.trim();
+          const fields = [];
+          container.querySelectorAll(`.notify-field[data-mall="${mall.key}"]:checked`).forEach(cb => fields.push(cb.dataset.field));
+          newConfig[mall.key] = { webhook_url, fields, enabled };
+        }
+        const { error } = await sb.from('settings').upsert({ key: 'discord_notify_config', value: newConfig, description: 'モール別Discord通知設定' });
+        const msg = document.getElementById('notify-save-msg');
+        if (error) { msg.textContent = 'エラー: ' + error.message; toast('保存失敗', 'error'); }
+        else { msg.textContent = '保存しました'; toast('通知設定を保存しました'); }
+        setTimeout(() => { msg.textContent = ''; }, 3000);
+      });
+
+      // Test send handlers
+      container.querySelectorAll('.notify-test').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const mk = btn.dataset.mall;
+          const webhookUrl = container.querySelector(`.notify-webhook[data-mall="${mk}"]`).value.trim();
+          const resultSpan = container.querySelector(`.notify-test-result[data-mall="${mk}"]`);
+          if (!webhookUrl) { resultSpan.textContent = 'Webhook URLを入力してください'; return; }
+
+          const selectedFields = [];
+          container.querySelectorAll(`.notify-field[data-mall="${mk}"]:checked`).forEach(cb => selectedFields.push(cb.dataset.field));
+
+          const mallInfo = mallDefs.find(m => m.key === mk);
+          const colorDec = parseInt(mallInfo.color.replace('#',''), 16);
+          const embedFields = [];
+          for (const fk of selectedFields) {
+            let fDef = null;
+            for (const block of Object.values(FIELD_DEFS)) {
+              fDef = block.fields.find(f => f.key === fk);
+              if (fDef) break;
+            }
+            if (fDef && fDef.type !== 'image') {
+              embedFields.push({ name: fDef.label, value: 'テストデータ', inline: true });
+            }
+          }
+
+          const embed = {
+            title: `テスト通知 - ${mallInfo.label}`,
+            color: colorDec,
+            fields: embedFields.length > 0 ? embedFields : [{ name: 'テスト', value: 'テスト通知です', inline: false }],
+            timestamp: new Date().toISOString(),
+          };
+
+          resultSpan.textContent = '送信中...';
+          try {
+            const res = await fetch(webhookUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ embeds: [embed] }),
+            });
+            resultSpan.textContent = res.ok ? '送信成功' : `エラー: ${res.status}`;
+          } catch(e) {
+            resultSpan.textContent = 'エラー: ' + e.message;
+          }
+          setTimeout(() => { resultSpan.textContent = ''; }, 5000);
         });
       });
     }
